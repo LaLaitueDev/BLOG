@@ -1,81 +1,93 @@
 <?php
+$filename = __DIR__ . '/data/articles.json';
+$articles = [];
+$categories = [];
 
-const ERROR_REQUIRED = "Veuillez renseigner une todo.";
-const ERROR_TOO_SHORT = "Veuillez entrer au moins 3 caractères.";
-
-$filename = __DIR__ . '\data\todo.json';
-$error = "";
-$todo = '';
-$todos = [];
+$_GET = filter_input_array(INPUT_GET, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+$selectedCat = $_GET['cat'] ?? '';
 
 if (file_exists($filename)) {
-    $data = file_get_contents($filename);
-    $todos = json_decode($data, true) ?? [];
+    $articles = json_decode(file_get_contents($filename), true) ?? [];
+    $cattmp = array_map(fn ($a) => $a['category'],  $articles);
+    $categories = array_reduce($cattmp, function ($acc, $cat) {
+        if (isset($acc[$cat])) {
+            $acc[$cat]++;
+        } else {
+            $acc[$cat] = 1;
+        }
+        return $acc;
+    }, []);
+    $articlePerCategories = array_reduce($articles, function ($acc, $article) {
+        if (isset($acc[$article['category']])) {
+            $acc[$article['category']][] = $article;
+        } else {
+            $acc[$article['category']] = [$article];
+        }
+        return $acc;
+    }, []);
 }
-
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-    $todo = $_POST['todo'] ?? '';
-
-    if (!$todo) {
-        $error = ERROR_REQUIRED;
-    } elseif (mb_strlen($todo) < 3) {
-        $error = ERROR_TOO_SHORT;
-    }
-
-    if (!$error) {
-        $todos = [...$todos, [
-            'name' => $todo,
-            'done' => false,
-            'id' => time()
-        ]];
-        file_put_contents($filename, json_encode($todos));
-    }
-}
-
-
 ?>
-
-
-
 
 <!DOCTYPE html>
 <html lang="fr">
 
 <head>
-    <?php require_once 'includes\head.php'; ?>
-    <title>ToDo</title>
+    <?php require_once 'includes/head.php' ?>
+    <link rel="stylesheet" href="/public/css/index.css">
+    <title>Blog</title>
 </head>
 
 <body>
     <div class="container">
-        <?php require_once 'includes\header.php'; ?>
+        <?php require_once 'includes/header.php' ?>
         <div class="content">
-            <div class="todo-container">
-                <h1>Ma Todo</h1>
-                <form action="\" method="POST" class="todo-form">
-                    <input value="<?= $todo ?>" name="todo" type="text">
-                    <button class="btn btn-primary">Afficher</button>
-                </form>
-                <?php if ($error) : ?>
-                    <p class="text-danger"><?= $error ?></p>
-                <?php endif; ?>
-                <ul class="todo-list">
-                    <?php foreach ($todos as $t) : ?>
-                        <li class="todo-item <?= $t['done'] ? 'low-opacity' : '' ?>">
-                            <span class="todo-name"><?= $t['name'] ?></span>
-                            <a href="edit-todo.php?id=<?= $t['id'] ?>">
-                                <button class="btn btn-primary btn-small"><?= $t['done'] ? 'Annuler' : 'Valider'; ?></button>
-                            </a>
-                            <button class="btn btn-danger btn-small">Supprimer</button>
+            <div class="newsfeed-container">
+                <div class="category-container">
+                    <ul class="category-container">
+                        <li class=<?= $selectedCat ? '' : 'cat-active' ?>>
+                            <a href="/">Tous les articles <span class="small">(<?= count($articles) ?>)</span></a>
                         </li>
-                    <?php endforeach; ?>
-                </ul>
+                        <?php foreach ($categories as $catName => $catNum) : ?>
+                            <li class=<?= $selectedCat ===  $catName ? 'cat-active' : '' ?>>
+                                <a href="/?cat=<?= $catName ?>"> <?= $catName ?><span class="small">(<?= $catNum ?>)</span> </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+                <div class="newsfeed-content">
+                    <?php if (!$selectedCat) : ?>
+                        <?php foreach ($categories as $cat => $num) : ?>
+                            <h2><?= $cat ?></h2>
+                            <div class="articles-container">
+                                <?php foreach ($articlePerCategories[$cat] as $a) : ?>
+                                    <a href="/show-article.php?id=<?= $a['id'] ?>" class="article block">
+                                        <div class="overflow">
+                                            <div class="img-container" style="background-image:url(<?= $a['image'] ?>"></div>
+                                        </div>
+                                        <h3><?= $a['title'] ?></h3>
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else : ?>
+                        <h2><?= $selectedCat ?></h2>
+                        <div class="articles-container">
+                            <?php foreach ($articlePerCategories[$selectedCat] as $a) : ?>
+                                <a href="/show-article.php?id=<?= $a['id'] ?>" class="article block">
+                                    <div class="overflow">
+                                        <div class="img-container" style="background-image:url(<?= $a['image'] ?>"></div>
+                                    </div>
+                                    <h3><?= $a['title'] ?></h3>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
-        <?php require_once 'includes\footer.php'; ?>
+        <?php require_once 'includes/footer.php' ?>
     </div>
+
 </body>
 
 </html>

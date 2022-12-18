@@ -2,7 +2,8 @@
 
 :root {
     --font-family: 'Open Sans', sans-serif;
-    --primary: #8e44ad;
+    --primary: #2ecc71;
+    --primary-dark: #009432;
     --danger: #e74c3c;
     --dark: #2c3e50;
     --background-light: #ecf0f1;
@@ -11,8 +12,6 @@
     --box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
     --border: 1px solid #eee;
 }
-
-
 
 /* reset */
 
@@ -43,6 +42,12 @@ ul {
     list-style-type: none;
 }
 
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+
 /* Container */
 
 .container {
@@ -51,6 +56,10 @@ ul {
     display: flex;
     flex-flow: column;
     color: var(--text-color);
+}
+
+.overflow {
+    overflow: hidden;
 }
 
 /* text */
@@ -97,12 +106,41 @@ ul {
     opacity: 0.5;
 }
 
+.small {
+    font-size: 12px;
+    margin: 0 0.5rem;
+}
+
 /* header */
 
 header {
     background-color: var(--primary);
     padding: 1.5rem;
     box-shadow: var(--box-shadow);
+    color: var(--text-color-light);
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-menu {
+    margin: 0;
+}
+
+.header-menu li {
+    border-radius: 3px;
+    padding: 5px 15px;
+    transition: background-color 0.2s;
+}
+
+.header-menu li:hover {
+    background-color: var(--primary-dark);
+
+}
+
+.active {
+    background-color: var(--primary-dark);
 }
 
 .logo {
@@ -124,57 +162,31 @@ footer {
 /* content */
 
 .content {
+    max-width: 100rem;
+    width: 100%;
     flex: 1;
     display: flex;
-    flex-flow: row;
-    justify-content: center;
+    flex-flow: column;
+    align-self: center;
+    padding: 2rem 0;
     align-items: center;
 }
 
-/* todo */
+/* block */
 
-.todo-container {
-    padding: 1.5rem;
+.block {
+    border-radius: 3px;
+    border: var(--border);
     background-color: white;
-    border: var(--border);
-    border-radius: 3px;
-    min-width: 30rem;
-    min-height: 40rem;
     box-shadow: var(--box-shadow);
 }
 
-.todo-container h1 {
-    text-align: center;
+/* utils */
+
+.p-20 {
+    padding: 2rem;
 }
 
-.todo-form {
-    display: flex;
-    flex-flow: row nowrap;
-    align-items: center;
-}
-
-.todo-form input {
-    flex: 1;
-    margin-right: 0.5rem;
-    border: var(--border);
-    border-radius: 3px;
-    padding: 10px 15px;
-    box-shadow: var(--box-shadow);
-}
-
-.todo-item {
-    display: flex;
-    flex-flow: row;
-    align-items: center;
-    margin-bottom: 0.5rem;
-    padding: 0.3rem 0.5rem;
-}
-
-.todo-item:nth-child(odd) {
-    background-color: var(--background-light);
-}
-
-.todo-name {
-    flex: 1;
-    margin-right: 0.5rem;
+.p-10 {
+    padding: 1rem;
 }
